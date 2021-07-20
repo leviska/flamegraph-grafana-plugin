@@ -89,7 +89,7 @@ function countSum(root: Span): number {
 }
 
 function countPercentage(root: Span, total: number) {
-  root.perc = root.sum / total;
+  root.perc = (root.sum * 100) / total;
   for (let obj of root.children) {
     countPercentage(obj, total);
   }
@@ -190,7 +190,7 @@ export function processSeries(seriesA: DataFrame[], seriesB: DataFrame[], option
 
   let root = cache.get('1;');
   countSum(root);
-  countPercentage(root, root.value);
+  countPercentage(root, root.sum);
   addPercentagesToName(root);
   return root;
 }
