@@ -6,6 +6,7 @@ interface Span {
   value: number;
   delta?: number;
   perc: number;
+  sum: number;
   children: Span[];
 }
 
@@ -73,23 +74,32 @@ function createNode(name: string): Span {
     name,
     value: 0.0,
     perc: 0.0,
+    sum: 0.0,
     children: [],
   };
 }
 
 // returns sum duration
-function countPercentage(root: Span): number {
-  let sum = 0.0;
+function countSum(root: Span): number {
   for (let obj of root.children) {
-    sum += countPercentage(obj);
+    root.sum += countSum(obj);
   }
-  sum += root.value;
-  root.perc = root.value / sum;
-  return sum;
+  root.sum += root.value;
+  return root.sum;
+}
+
+function countPercentage(root: Span, total: number) {
+  root.perc = root.sum / total;
+  for (let obj of root.children) {
+    countPercentage(obj, total);
+  }
 }
 
 function addPercentagesToName(root: Span) {
   root.name += ' ' + toFixed(root.perc, 1) + '%';
+  for (let obj of root.children) {
+    addPercentagesToName(obj);
+  }
 }
 
 export function processSeries(seriesA: DataFrame[], seriesB: DataFrame[], options: Options): Span | undefined {
@@ -179,7 +189,8 @@ export function processSeries(seriesA: DataFrame[], seriesB: DataFrame[], option
   }
 
   let root = cache.get('1;');
-  countPercentage(root);
+  countSum(root);
+  countPercentage(root, root.value);
   addPercentagesToName(root);
   return root;
 }
