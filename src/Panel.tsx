@@ -70,10 +70,14 @@ export class FlameGraphPanel extends React.Component<Props> {
       .differential(seriesB.length > 0)
       .label(
         (node) =>
-          `${node.data.name}:<br>
-            Self value ${nsToString(node.data.value)}<br>
-            Perc: ${toFixed(node.data.perc, 1)}%
-            ${node.data.delta ? `<br>Diff ${nsToString(node.data.delta)}.` : ''}`
+          `${node.data.name}:
+Self value ${nsToString(node.data.value)}
+Perc: ${toFixed(node.data.perc, 1)}% ${
+            node.data.delta
+              ? `
+Diff ${nsToString(node.data.delta)}.`
+              : ''
+          }`
       );
     d3.select(this.divRef.current).datum(processSeries(seriesA, seriesB, this.props.options)).call(fg);
   }
