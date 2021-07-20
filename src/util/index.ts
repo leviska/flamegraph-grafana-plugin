@@ -1,10 +1,11 @@
-import { DataFrame } from '@grafana/data';
+import { DataFrame, toFixed } from '@grafana/data';
 import { Options } from '../types';
 
 interface Span {
   name: string;
   value: number;
   delta?: number;
+  perc: number;
   children: Span[];
 }
 
@@ -71,8 +72,24 @@ function createNode(name: string): Span {
   return {
     name,
     value: 0.0,
+    perc: 0.0,
     children: [],
   };
+}
+
+// returns sum duration
+function countPercentage(root: Span): number {
+  let sum = 0.0;
+  for (let obj of root.children) {
+    sum += countPercentage(obj);
+  }
+  sum += root.value;
+  root.perc = root.value / sum;
+  return sum;
+}
+
+function addPercentagesToName(root: Span) {
+  root.name += ' ' + toFixed(root.perc, 1) + '%';
 }
 
 export function processSeries(seriesA: DataFrame[], seriesB: DataFrame[], options: Options): Span | undefined {
@@ -161,5 +178,8 @@ export function processSeries(seriesA: DataFrame[], seriesB: DataFrame[], option
     }
   }
 
-  return cache.get('1;');
+  let root = cache.get('1;');
+  countPercentage(root);
+  addPercentagesToName(root);
+  return root;
 }
