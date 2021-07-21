@@ -114,9 +114,6 @@ function addPercentagesToName(root: Span) {
 function countTraceCnt(traceCount: DataFrame[]): number {
   let res = 0.0;
   for (let i = 0; i < traceCount.length; i++) {
-    for (let j = 0; j < traceCount[i].fields.length; j++) {
-      console.log(traceCount[i].fields[j].name);
-    }
     const valueField = traceCount[i].fields.find((f) => f.name === 'Value');
     if (!valueField) {
       continue;
