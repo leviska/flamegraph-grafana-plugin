@@ -7,6 +7,7 @@ interface Span {
   delta?: number;
   perc: number;
   sum: number;
+  cnt: number;
   children: Span[];
 }
 
@@ -75,6 +76,7 @@ function createNode(name: string): Span {
     value: 0.0,
     perc: 0.0,
     sum: 0.0,
+    cnt: 0.0,
     children: [],
   };
 }
@@ -95,6 +97,13 @@ function countPercentage(root: Span, total: number) {
   }
 }
 
+function setCnt(root: Span, cnt: number) {
+  root.cnt = cnt;
+  for (let obj of root.children) {
+    setCnt(obj, cnt);
+  }
+}
+
 function addPercentagesToName(root: Span) {
   root.name += ' ' + toFixed(root.perc, 1) + '%';
   for (let obj of root.children) {
@@ -102,7 +111,27 @@ function addPercentagesToName(root: Span) {
   }
 }
 
-export function processSeries(seriesA: DataFrame[], seriesB: DataFrame[], options: Options): Span | undefined {
+function countTraceCnt(traceCount: DataFrame[]): number {
+  let res = 0.0;
+  for (let i = 0; i < traceCount.length; i++) {
+    for (let j = 0; j < traceCount[i].fields.length; j++) {
+      console.log(traceCount[i].fields[j].name);
+    }
+    const valueField = traceCount[i].fields.find((f) => f.name === 'Value');
+    if (!valueField) {
+      continue;
+    }
+    res += valueField.values.get(0);
+  }
+  return Math.max(1.0, res);
+}
+
+export function processSeries(
+  seriesA: DataFrame[],
+  seriesB: DataFrame[],
+  traceCount: DataFrame[],
+  options: Options
+): Span | undefined {
   const byIdSeriesA = new Map();
   const cache = new Map();
   const ids = new Map();
@@ -189,6 +218,8 @@ export function processSeries(seriesA: DataFrame[], seriesB: DataFrame[], option
   }
 
   let root = cache.get('1;');
+  let cnt = countTraceCnt(traceCount);
+  setCnt(root, cnt);
   countSum(root);
   countPercentage(root, root.sum);
   addPercentagesToName(root);

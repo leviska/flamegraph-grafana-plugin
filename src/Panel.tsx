@@ -46,6 +46,7 @@ export class FlameGraphPanel extends React.Component<Props> {
 
     const seriesA = [];
     const seriesB = [];
+    const traceCount = [];
     const size = data.series.length;
 
     for (let i = 0; i < size; i++) {
@@ -53,6 +54,8 @@ export class FlameGraphPanel extends React.Component<Props> {
 
       if (serie.refId === 'A') {
         seriesA.push(serie);
+      } else if (serie.refId === 'count') {
+        traceCount.push(serie);
       } else {
         seriesB.push(serie);
       }
@@ -71,15 +74,15 @@ export class FlameGraphPanel extends React.Component<Props> {
       .label(
         (node) =>
           `${node.data.name}:
-Self value ${nsToString(node.data.value)}
-Perc: ${toFixed(node.data.perc, 1)}% ${
+sum: ${nsToString(node.data.sum)}
+perc: ${toFixed(node.data.perc, 1)}% ${
             node.data.delta
               ? `
-Diff ${nsToString(node.data.delta)}.`
+self: ${nsToString(node.data.delta)}`
               : ''
           }`
       );
-    d3.select(this.divRef.current).datum(processSeries(seriesA, seriesB, this.props.options)).call(fg);
+    d3.select(this.divRef.current).datum(processSeries(seriesA, seriesB, traceCount, this.props.options)).call(fg);
   }
 
   shouldComponentUpdate(nextProps: Readonly<Props>, nextState: Readonly<{}>, nextContext: any): boolean {
