@@ -75,6 +75,8 @@ export class FlameGraphPanel extends React.Component<Props> {
         (node) =>
           `${node.data.name}:
 sum: ${nsToString(node.data.sum)}
+mean: ${nsToString(node.data.sum / node.data.cnt)}
+count: ${nsToString(node.data.cnt)}
 perc: ${toFixed(node.data.perc, 1)}% ${
             node.data.delta
               ? `
