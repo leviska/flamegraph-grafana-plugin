@@ -215,7 +215,7 @@ export function processSeries(
   }
 
   let root = cache.get('1;');
-  let cnt = countTraceCnt(traceCount);
+  let cnt = Math.round(countTraceCnt(traceCount));
   setCnt(root, cnt);
   countSum(root);
   countPercentage(root, root.sum);
